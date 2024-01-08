@@ -1,6 +1,7 @@
 const express = require('express');
-require('dotenv').config();
 const nodemailer = require('nodemailer');
+const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,9 +23,21 @@ let transporter = nodemailer.createTransport({
   },
 });
 
+function authenticateToken(req, res, next) {
+  const userToken = req.headers['x-auth-token'];
+  const secertToken = process.env.API_AUTH_TOKEN;
+
+  if (userToken == null || userToken !== secertToken) 
+    return res.sendStatus(401);
+
+  next();
+}
+
 app.get('/', (req, res) => {
-  res.send('Welcome to the home page for api-mailer! Made with ❤️ by @arnavsharma2711');
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+app.use(authenticateToken);
 
 app.post('/send-email', async (req, res) => {
   const { to, subject, html} = req.body;
