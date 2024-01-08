@@ -1,6 +1,6 @@
 # Mailer App API
 
-Mailer App API is a simple Node.js application using Express and Nodemailer to send emails. It provides an endpoint to send emails with a specified recipient, subject, and HTML content.
+Mailer App API is a simple Node.js application using Express and Nodemailer to send emails. It provides an endpoint to send emails with a specified recipient, subject, and HTML content. It now includes token-based authentication to secure the `/send-email` endpoint.
 
 ## Prerequisites
 - Node.js installed on your machine
@@ -17,8 +17,9 @@ Mailer App API is a simple Node.js application using Express and Nodemailer to s
    PORT=3000
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-email-password
+   API_AUTH_TOKEN=your-secret-token
    ```
-4. Replace `your-email@gmail.com` and `your-email-password` with your Gmail credentials.
+4. Replace `your-email@gmail.com`, `your-email-password`, and `your-secret-token` with your Gmail credentials and a secret token for API authentication.
 
 ## Running the Application
 Start the server by running:
@@ -38,7 +39,13 @@ The server will run on http://localhost:3000 or the port specified in your `.env
 ### 2. Send Email
 - **URL:** `/send-email`
 - **Method:** `POST`
-- **Description:** Sends an email with the provided details.
+- **Description:** Sends an email with the provided details. Requires authentication using the `x-auth-token` header.
+- **Request Headers:**
+  ```json
+  {
+    "x-auth-token": "your-secret-token"
+  }
+  ```
 - **Request Body:**
   ```json
   {
@@ -48,6 +55,9 @@ The server will run on http://localhost:3000 or the port specified in your `.env
   }
   ```
 - **Example:** `http://localhost:3000/send-email`
+
+## Authentication
+Token-based authentication is implemented using the `x-auth-token` header. Include this header with the secret token in your requests to the `/send-email` endpoint.
 
 ## CORS Configuration
 The server is configured to allow Cross-Origin Resource Sharing (CORS) to any origin.
