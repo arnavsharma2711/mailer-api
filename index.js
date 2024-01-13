@@ -41,13 +41,13 @@ function authenticateToken(req, res, next) {
   }
 }
 
+app.use(express.static(__dirname));
+
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'static/index.html'));
 });
 
-app.use(authenticateToken);
-
-app.post('/send-email', async (req, res) => {
+app.post('/send-email', authenticateToken, async (req, res) => {
   const { subject, html} = req.body;
 
   const mailOptions = {
@@ -70,7 +70,7 @@ app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
-// TO be user from the app email needs to be called from the app
+// To be user from the app email needs to be called from the app
 // const payload = {
 //   to: 'test@email.com'
 // };
