@@ -17,6 +17,11 @@ app.use((req, res, next) => {
   next();
 });
 
+app.options('*', (req, res) => {
+  // Pre-flight request. Reply successfully:
+  res.status(200).send();
+});
+
 let emailTransporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
