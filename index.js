@@ -37,7 +37,12 @@ function authenticateToken(req, res, next) {
   }
   try {
     const decoded = jwt.verify(token, authTokenSecret);
-    req.user = decoded;
+    req.from = decoded.from || "Mailer API";
+    req.to = decoded.to;
+
+    if (!req.to) {
+      return res.status(400).send("Invalid Token. Email not found.");
+    }
 
     next();
   } catch (ex) {
@@ -53,20 +58,24 @@ app.post("/send-email", authenticateToken, async (req, res) => {
   const { subject, html } = req.body;
 
   const mailOptions = {
-    from: process.env.GMAIL_USER,
-    to: req.user.to,
+    from: `"${req.from}" <${process.env.GMAIL_USER}>`,
+    to: req.to,
     subject,
     html,
   };
 
   try {
     await emailTransporter.sendMail(mailOptions);
-    res
-      .status(200)
-      .json({ success: true, message: "Email sent successfully!" });
+    res.status(200).json({
+      success: true,
+      message: "Email sent successfully!",
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Failed to send email." });
+    res.status(500).json({
+      success: false,
+      message: "Failed to send email.",
+    });
   }
 });
 
@@ -80,9 +89,10 @@ app.listen(port, () => {
 
 // To be user from the app email needs to be called from the app
 // const payload = {
-//   to: 'test@email.com'
+//   to: "test@email.com",
+//   from: "Mailer API",
 // };
 // const options = {
-//   expiresIn: '1h',
+//   expiresIn: "1h",
 // };
-// const jwtToken =  jwt.sign(payload, authTokenSecret, options);
+// const jwtToken = jwt.sign(payload, authTokenSecret, options);
