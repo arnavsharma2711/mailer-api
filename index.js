@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const path = require("node:path");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const app = express();
@@ -49,6 +50,19 @@ function authenticateToken(req, res, next) {
     res.status(401).send("Invalid Token.");
   }
 }
+
+const limiter = rateLimit({
+  windowMs: Number.parseInt(process.env.RATE_LIMIT_WINDOW || 15, 2) * 60 * 1000,
+  max: process.env.RATE_LIMIT_MAX || 5,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many requests from this IP, please try again later.",
+    });
+  },
+});
+
+app.use(limiter);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "static/index.html"));
