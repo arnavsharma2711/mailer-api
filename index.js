@@ -52,7 +52,7 @@ function authenticateToken(req, res, next) {
 }
 
 const limiter = rateLimit({
-  windowMs: Number.parseInt(process.env.RATE_LIMIT_WINDOW || 15, 2) * 60 * 1000,
+  windowMs: Number.parseInt(process.env.RATE_LIMIT_WINDOW || 15, 10) * 60 * 1000,
   max: process.env.RATE_LIMIT_MAX || 5,
   handler: (req, res) => {
     res.status(429).json({
@@ -62,13 +62,11 @@ const limiter = rateLimit({
   },
 });
 
-app.use(limiter);
-
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "static/index.html"));
 });
 
-app.post("/send-email", authenticateToken, async (req, res) => {
+app.post("/send-email", limiter, authenticateToken, async (req, res) => {
   const { subject, html } = req.body;
 
   const mailOptions = {
