@@ -18,10 +18,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.options("*", (req, res) => {
-  res.status(200).send();
-});
-
 const emailTransporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
